@@ -28,9 +28,11 @@ jobs:
 
       - name: Clone MIT extension template
         run: |
-          git clone --recurse-submodules https://github.com/mit-cml/extension-template.git template
-          cd template
-          ./upgrade-appinventor.sh
+            git clone --recurse-submodules https://github.com/mit-cml/extension-template.git template
+            cd template
+            git config user.name "NinjaCore Builder"
+            git config user.email "ninjacore-builder@example.com"
+            ./upgrade-appinventor.sh
 
       - name: Copy NinjaCore source
         run: |
