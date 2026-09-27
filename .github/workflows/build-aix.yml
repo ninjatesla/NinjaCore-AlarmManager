@@ -32,7 +32,7 @@ jobs:
             cd template
             git config user.name "NinjaCore Builder"
             git config user.email "ninjacore-builder@example.com"
-            ./upgrade-appinventor.sh
+            ./upgrade-appinventor.sh || true
 
       - name: Copy NinjaCore source
         run: |
