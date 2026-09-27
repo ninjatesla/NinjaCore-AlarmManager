@@ -1,10 +1,11 @@
-name: Build NinjaCore Alarm Manager AIX
+
+name: Build NinjaCoreWebSocket AIX
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
@@ -14,40 +15,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Find V2 ZIP
-        run: |
-          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
-          echo "ZIP=$ZIP"
-          unzip -o "$ZIP" -d extracted
-
       - name: Prepare extension source
         run: |
-          mkdir -p extension
-          ROOT=$(find extracted -type d -name src | head -n 1)
-          cp -r "$(dirname "$ROOT")"/* extension/
-
-      - name: Clone MIT extension template
-        run: |
-            git clone --recurse-submodules https://github.com/mit-cml/extension-template.git template
-            cd template
-            git config user.name "NinjaCore Builder"
-            git config user.email "ninjacore-builder@example.com"
-            ./upgrade-appinventor.sh || true
-
-      - name: Copy NinjaCore source
-        run: |
-          cp -r extension/src/* template/src/
-          if [ -d extension/lib ]; then
-            cp -r extension/lib/* template/lib/
-          fi
+          mkdir -p src/com/ninjacore/websocket/images
+          cp NinjaCoreWebSocket.java src/com/ninjacore/websocket/NinjaCoreWebSocket.java
+          cp ninjacore.png src/com/ninjacore/websocket/images/ninjacore.png
 
       - name: Build AIX
-        run: |
-          cd template
-          ant extensions
+        id: build
+        uses: pavi2410/AIX-Action@main
+        with:
+          source-dir: src
+          package-name: com.ninjacore.websocket
+          appinventor-repo: mit-cml/appinventor-sources
+          appinventor-branch: master
 
       - name: Upload AIX
         uses: actions/upload-artifact@v4
         with:
-          name: NinjaCore-AlarmManager-AIX
-          path: template/build/extensions/*.aix
+          name: NinjaCoreWebSocket-AIX
+          path: ${{ steps.build.outputs.extension-path }}
