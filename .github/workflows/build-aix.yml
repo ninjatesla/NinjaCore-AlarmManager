@@ -1,0 +1,48 @@
+name: Build NinjaCore Alarm Manager AIX
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find V2 ZIP
+        run: |
+          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+          echo "ZIP=$ZIP"
+          unzip -o "$ZIP" -d extracted
+
+      - name: Prepare extension source
+        run: |
+          mkdir -p extension
+          ROOT=$(find extracted -type d -name src | head -n 1)
+          cp -r "$(dirname "$ROOT")"/* extension/
+
+      - name: Clone MIT extension template
+        run: |
+          git clone --recurse-submodules https://github.com/mit-cml/extension-template.git template
+          cd template
+          ./upgrade-appinventor.sh
+
+      - name: Copy NinjaCore source
+        run: |
+          cp -r extension/src/* template/src/
+          if [ -d extension/lib ]; then
+            cp -r extension/lib/* template/lib/
+          fi
+
+      - name: Build AIX
+        run: |
+          cd template
+          ant extensions
+
+      - name: Upload AIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: NinjaCore-AlarmManager-AIX
+          path: template/build/extensions/*.aix
