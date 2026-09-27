@@ -1,6 +1,9 @@
 name: Build NinjaCore Alarm Manager AIX
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
