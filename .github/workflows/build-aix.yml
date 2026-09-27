@@ -1,5 +1,4 @@
-
-name: Build NinjaCoreWebSocket AIX
+name: Build NinjaCore Alarm Manager AIX
 
 on:
   workflow_dispatch:
@@ -17,21 +16,33 @@ jobs:
 
       - name: Prepare extension source
         run: |
-          mkdir -p src/com/ninjacore/websocket/images
-          cp NinjaCoreWebSocket.java src/com/ninjacore/websocket/NinjaCoreWebSocket.java
-          cp ninjacore.png src/com/ninjacore/websocket/images/ninjacore.png
+          ZIP=$(find . -maxdepth 1 -type f -name "NinjaCore-AlarmManager-v2*.zip" | head -n 1)
+          echo "Using ZIP: $ZIP"
+
+          unzip -o "$ZIP" -d extracted
+
+          mkdir -p src/com/ninjacore/alarmmanager/images
+
+          cp $(find extracted -name "NinjaAlarmManager.java" | head -n 1) \
+             src/com/ninjacore/alarmmanager/NinjaAlarmManager.java
+
+          cp $(find extracted -name "NinjaAlarmReceiver.java" | head -n 1) \
+             src/com/ninjacore/alarmmanager/NinjaAlarmReceiver.java
+
+          cp $(find extracted -name "alarm.png" | head -n 1) \
+             src/com/ninjacore/alarmmanager/images/alarm.png
 
       - name: Build AIX
         id: build
         uses: pavi2410/AIX-Action@main
         with:
           source-dir: src
-          package-name: com.ninjacore.websocket
+          package-name: com.ninjacore.alarmmanager
           appinventor-repo: mit-cml/appinventor-sources
           appinventor-branch: master
 
       - name: Upload AIX
         uses: actions/upload-artifact@v4
         with:
-          name: NinjaCoreWebSocket-AIX
+          name: NinjaCore-AlarmManager-AIX
           path: ${{ steps.build.outputs.extension-path }}
