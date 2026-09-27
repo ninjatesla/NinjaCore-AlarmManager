@@ -17,6 +17,7 @@ jobs:
       - name: Prepare extension source
         run: |
           ZIP=$(find . -maxdepth 1 -type f -name "NinjaCore-AlarmManager-v2*.zip" | head -n 1)
+
           echo "Using ZIP: $ZIP"
 
           unzip -o "$ZIP" -d extracted
@@ -31,6 +32,16 @@ jobs:
 
           cp $(find extracted -name "alarm.png" | head -n 1) \
              src/com/ninjacore/alarmmanager/images/alarm.png
+
+          # Fix MIT App Inventor annotation package
+          sed -i \
+            's/import com.google.appinventor.components.common.PropertyCategory;/import com.google.appinventor.components.annotations.PropertyCategory;/' \
+            src/com/ninjacore/alarmmanager/NinjaAlarmManager.java
+
+          # Fix current ReceiverElement API
+          sed -i \
+            's/exported = false/exported = "false"/g' \
+            src/com/ninjacore/alarmmanager/NinjaAlarmManager.java
 
       - name: Build AIX
         id: build
